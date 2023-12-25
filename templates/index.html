@@ -1,18 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" href="{{url_for('static',filename='icon.png')}}"></link>
+    <link rel="stylesheet" href="{{url_for('static',filename='style.css')}}">
     <meta charset="utf-8">
     <title>{{name}}'s WatchList</title>
 </head>
 <body>
-    <h2>{{name}}'s WatchList</h2>
+    <h2>
+        <img alt="Avatar" class="avatar" src="{{url_for('static',filename='images/avatar.jpg')}}">
+        {{name}}'s WatchList
+    </h2>
     {# use length filter to get length of variable movies #}
     <p>{{movies|length}} Titles</p>
-    <ul>
+    <ul class="movie-list">
         {%for movie in movies %}
         <li>{{movie.title}} - {{movie.year}}</li> {# same as movie['title'] #}
         {%endfor%}
     </ul>
+    <img alt="flying mouse" class="fatmouse" src="{{url_for('static',filename='images/fatmouse.gif')}}">
     <footer> 
         <small>&copy; 2018 <a href="http://helloflask.com/book/3">HelloFlask</a></small>
     </footer>
