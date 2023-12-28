@@ -21,7 +21,7 @@ db = SQLAlchemy(app)
 def index():
     user = User.query.first()  # 读取用户记录
     movies = Movies.query.all()
-    return render_template('index.html',user=user,movies=movies)
+    return render_template('index.html',movies=movies)
 @app.route('/home')
 @app.route('/hello')
 def hello():
@@ -41,7 +41,7 @@ def test_url_for():
 @app.cli.command()
 def forge():
     db.create_all()
-    name = 'Grey Li'
+    name = 'Wenjun'
     movies = [
         {'title': 'My Neighbor Totoro', 'year': '1988'},
         {'title': 'Dead Poets Society', 'year': '1989'},
@@ -58,7 +58,7 @@ def forge():
     db.session.add(user)
     click.echo('Done.')
     for m in movies:
-        movie = Movies(title=m['title'])
+        movie = Movies(title=m['title'],year=m['year'])
         db.session.add(movie)
     db.session.commit()
 class User(db.Model):
@@ -76,4 +76,11 @@ def initdb(drop):
         db.drop_all()
     db.create_all()
     click.echo('Initialized database.')
-    
+@app.errorhandler(404)
+def page_not_found(e):
+    user = User.query.first()
+    return render_template('404.html'),404
+@app.context_processor
+def inject_user():
+    user=User.query.first()
+    return dict(user=user)
