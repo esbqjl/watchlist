@@ -4,6 +4,7 @@ import click
 from markupsafe import escape
 import os
 import sys
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 WIN = sys.platform.startswith('win')
 if WIN:  # 如果是 Windows 系统，使用三个斜线
@@ -76,6 +77,12 @@ def forge():
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(20))
+    username = db.Column(db.String(20))
+    password_hash=db.Column(db.String(128))
+    def set_password(self,password):
+        self.password_hash=generate_password_hash(password)
+    def validate_password(self,password):
+        return check_password_hash(self.password_hash,password)
 class Movies(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(60))
@@ -121,3 +128,23 @@ def delete(movie_id):
     db.session.commit()
     flash('Item deleted.')
     return redirect(url_for('index'))
+import click
+@app.cli.command()
+@click.option('--username',prompt=True,help="The username used to login.")
+@click.option('--password',prompt=True,hide_input=True,confirmation_prompt=True,help='The password used to login.')
+def admin(username, password):
+    '''Create User.'''
+    db.create_all()
+    user = User.query.first()
+    if user is not None:
+        click.echo('Updating user...')
+        user.username = username
+        user.set_password(password)
+    else:
+        click.echo('Creating User...')
+        user = User(username=username, name='Admin')
+        user.set_password(password)
+        db.session.add(user)
+        
+    db.session.commit()
+    click.echo('Done.')
