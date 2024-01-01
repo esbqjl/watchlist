@@ -6,6 +6,7 @@ import os
 import sys
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 WIN = sys.platform.startswith('win')
 if WIN:  # 如果是 Windows 系统，使用三个斜线
     prefix = 'sqlite:///'
@@ -148,3 +149,8 @@ def admin(username, password):
         
     db.session.commit()
     click.echo('Done.')
+login_manager = LoginManager(app)
+@login_manager.user_loader
+def load_user(user_id):
+    user = User.query.get(int(user_id))
+    return user
