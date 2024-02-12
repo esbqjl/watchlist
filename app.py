@@ -29,14 +29,14 @@ def index():
         title = request.form.get('title')
         year=request.form.get('year')
         if not title or not year or len(year)>4 or len(title)>60:
-            flash('Invalid input') #显示错误提示
+            flash('Invalid input.') #显示错误提示
             return redirect(url_for('index'))
-        movie = Movies(title=title,year=year)
+        movie = Movie(title=title,year=year)
         db.session.add(movie)
         db.session.commit()
         flash('Item created.')
         return redirect(url_for('index'))
-    movies = Movies.query.all()
+    movies = Movie.query.all()
     return render_template('index.html',movies=movies)
 @app.route('/home')
 @app.route('/hello')
@@ -74,7 +74,7 @@ def forge():
     db.session.add(user)
     click.echo('Done.')
     for m in movies:
-        movie = Movies(title=m['title'],year=m['year'])
+        movie = Movie(title=m['title'],year=m['year'])
         db.session.add(movie)
     db.session.commit()
 class User(db.Model, UserMixin):
@@ -86,7 +86,7 @@ class User(db.Model, UserMixin):
         self.password_hash=generate_password_hash(password)
     def validate_password(self,password):
         return check_password_hash(self.password_hash,password)
-class Movies(db.Model):
+class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(60))
     year = db.Column(db.String(4))
@@ -112,12 +112,12 @@ def inject_user():
 @app.route('/movie/edit/<int:movie_id>',methods=['GET','POST'])
 @login_required
 def edit(movie_id):
-    movie = Movies.query.get_or_404(movie_id)
+    movie = Movie.query.get_or_404(movie_id)
     if request.method=='POST':
         title=request.form['title']
         year=request.form['year']
         if not title or not year or len(year)>4 or len(title)>60:
-            flash('Invalid input')
+            flash('Invalid input.')
             return redirect(url_for('edit',movie_id=movie_id))
         movie.title=title
         movie.year=year
@@ -128,7 +128,7 @@ def edit(movie_id):
 @app.route('/movie/delete/<int:movie_id>',methods=['POST'])
 @login_required
 def delete(movie_id):
-    movie=Movies.query.get_or_404(movie_id)
+    movie=Movie.query.get_or_404(movie_id)
     db.session.delete(movie)
     db.session.commit()
     flash('Item deleted.')
@@ -171,11 +171,10 @@ def login():
         user = User.query.first()
         
         if username==user.username and user.validate_password(password):
-            print("we are here")
             login_user(user)
             flash('Login Success.')
             return redirect(url_for('index'))
-        flash('Invalid username or password')
+        flash('Invalid username or password.')
         return redirect(url_for('login'))
     return render_template('login.html')
 @app.route('/logout')
@@ -190,7 +189,7 @@ def settings():
     if request.method=='POST':
         name = request.form['name']
         if not name or len(name)>20:
-            flash('Invalid input')
+            flash('Invalid input.')
             return redirect(url_for('settings'))
         current_user.name=name
         db.session.commit()
